@@ -16,6 +16,7 @@ function Client () {
   this.library = library
 
   this.theme = new Theme(this)
+  this.sketch = new Sketch(this)
   this.acels = new Acels(this)
   this.source = new Source(this)
   this.history = new History(this)
@@ -35,8 +36,11 @@ function Client () {
   }
   this.guide = false
 
-  this.el = document.createElement('canvas')
-  this.context = this.el.getContext('2d')
+//   this.el = document.createElement('canvas')
+//   this.context = this.el.getContext('2d')
+  this.p5Canvas = this.sketch.createCanvas(this.orca.w, this.orca.h);
+  this.el = this.p5Canvas.elt;
+  this.context = this.p5Canvas.drawingContext;
 
   this.install = (host) => {
     host.appendChild(this.el)
@@ -137,8 +141,9 @@ function Client () {
 
     this.reset()
     this.modZoom()
+    this.sketch.setup(this.tile, this.orca);
     this.update()
-    this.el.className = 'ready'
+    this.el.classList.add('ready')
 
     this.toggleGuide()
   }
@@ -288,7 +293,8 @@ function Client () {
   // Canvas
 
   this.clear = () => {
-    this.context.clearRect(0, 0, this.el.width, this.el.height)
+    // this.context.clearRect(0, 0, this.el.width, this.el.height)
+    this.sketch.draw();
   }
 
   this.drawProgram = () => {
@@ -398,6 +404,7 @@ function Client () {
 
     this.el.width = w
     this.el.height = h
+    this.sketch.resize(w, h);
     this.el.style.width = `${Math.ceil(this.tile.w * this.orca.w)}px`
     this.el.style.height = `${Math.ceil((this.tile.h + (this.tile.h / 5)) * this.orca.h)}px`
 
