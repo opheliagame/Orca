@@ -26,6 +26,8 @@ function Client () {
   this.commander = new Commander(this)
   this.clock = new Clock(this)
 
+  // this.map = new Map(this)
+
   // Settings
   this.scale = window.devicePixelRatio
   this.grid = { w: 8, h: 8 }
@@ -141,6 +143,9 @@ function Client () {
     this.el.className = 'ready'
 
     this.toggleGuide()
+
+    // this.map.start()
+    // this.map.fetchMap('./maps/map1.txt')
   }
 
   this.reset = () => {
