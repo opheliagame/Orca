@@ -113,7 +113,8 @@ function Sketch(client) {
         } 
     }
 
-    setInterval(() => this.generate(), 200);
+    setInterval(() => this.generate(), 1000);
+    setInterval(() => this.initBoard(), 2*60*1000);
 
     this.clear = () => {
         clear();
