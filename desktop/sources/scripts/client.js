@@ -19,15 +19,15 @@ function Client () {
   this.acels = new Acels(this)
   this.source = new Source(this)
   this.history = new History(this)
-
+  
   this.orca = new Orca(this.library)
   this.io = new IO(this)
   this.cursor = new Cursor(this)
   this.commander = new Commander(this)
   this.clock = new Clock(this)
-
-  // this.map = new Map(this)
-
+  
+  this.map = new GameMap(this)
+  
   // Settings
   this.scale = window.devicePixelRatio
   this.grid = { w: 8, h: 8 }
@@ -80,10 +80,10 @@ function Client () {
     this.acels.set('Cursor', 'Trigger Operator', 'CmdOrCtrl+P', () => { this.cursor.trigger() })
     this.acels.set('Cursor', 'Reset', 'Escape', () => { this.toggleGuide(false); this.commander.stop(); this.clear(); this.clock.isPaused = false; this.cursor.reset() })
 
-    this.acels.set('Move', 'Move North', 'ArrowUp', () => { this.cursor.move(0, 1) })
-    this.acels.set('Move', 'Move East', 'ArrowRight', () => { this.cursor.move(1, 0) })
-    this.acels.set('Move', 'Move South', 'ArrowDown', () => { this.cursor.move(0, -1) })
-    this.acels.set('Move', 'Move West', 'ArrowLeft', () => { this.cursor.move(-1, 0) })
+    this.acels.set('Move', 'Move North', 'ArrowUp', () => { this.cursor.move(0, 1); console.log(this.cursor.minY) })
+    this.acels.set('Move', 'Move East', 'ArrowRight', () => { this.cursor.move(1, 0); console.log(this.cursor.minX) })
+    this.acels.set('Move', 'Move South', 'ArrowDown', () => { this.cursor.move(0, -1); console.log(this.cursor.minY) })
+    this.acels.set('Move', 'Move West', 'ArrowLeft', () => { this.cursor.move(-1, 0); console.log(this.cursor.minX) })
     this.acels.set('Move', 'Move North(Leap)', 'CmdOrCtrl+ArrowUp', () => { this.cursor.move(0, this.grid.h) })
     this.acels.set('Move', 'Move East(Leap)', 'CmdOrCtrl+ArrowRight', () => { this.cursor.move(this.grid.w, 0) })
     this.acels.set('Move', 'Move South(Leap)', 'CmdOrCtrl+ArrowDown', () => { this.cursor.move(0, -this.grid.h) })
@@ -144,8 +144,8 @@ function Client () {
 
     this.toggleGuide()
 
-    // this.map.start()
-    // this.map.fetchMap('./maps/map1.txt')
+    this.map.start()
+    this.map.fetchMap('./maps/dum.txt')
   }
 
   this.reset = () => {
