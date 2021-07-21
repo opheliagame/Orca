@@ -26,6 +26,7 @@ function Client () {
   this.commander = new Commander(this)
   this.clock = new Clock(this)
   
+  this.sketch = new Sketch(this)
   this.map = new GameMap(this)
   
   // Settings
@@ -42,6 +43,7 @@ function Client () {
 
   this.install = (host) => {
     host.appendChild(this.el)
+    host.appendChild(this.sketch.setup())
     this.theme.install(host)
 
     this.theme.default = { background: '#000000', f_high: '#ffffff', f_med: '#777777', f_low: '#444444', f_inv: '#000000', b_high: '#eeeeee', b_med: '#72dec2', b_low: '#444444', b_inv: '#ffb545' }
@@ -80,10 +82,10 @@ function Client () {
     this.acels.set('Cursor', 'Trigger Operator', 'CmdOrCtrl+P', () => { this.cursor.trigger() })
     this.acels.set('Cursor', 'Reset', 'Escape', () => { this.toggleGuide(false); this.commander.stop(); this.clear(); this.clock.isPaused = false; this.cursor.reset() })
 
-    this.acels.set('Move', 'Move North', 'ArrowUp', () => { this.cursor.move(0, 1); console.log(this.cursor.minY) })
-    this.acels.set('Move', 'Move East', 'ArrowRight', () => { this.cursor.move(1, 0); console.log(this.cursor.minX) })
-    this.acels.set('Move', 'Move South', 'ArrowDown', () => { this.cursor.move(0, -1); console.log(this.cursor.minY) })
-    this.acels.set('Move', 'Move West', 'ArrowLeft', () => { this.cursor.move(-1, 0); console.log(this.cursor.minX) })
+    this.acels.set('Move', 'Move North', 'ArrowUp', () => { this.cursor.move(0, 1) })
+    this.acels.set('Move', 'Move East', 'ArrowRight', () => { this.cursor.move(1, 0) })
+    this.acels.set('Move', 'Move South', 'ArrowDown', () => { this.cursor.move(0, -1) })
+    this.acels.set('Move', 'Move West', 'ArrowLeft', () => { this.cursor.move(-1, 0) })
     this.acels.set('Move', 'Move North(Leap)', 'CmdOrCtrl+ArrowUp', () => { this.cursor.move(0, this.grid.h) })
     this.acels.set('Move', 'Move East(Leap)', 'CmdOrCtrl+ArrowRight', () => { this.cursor.move(this.grid.w, 0) })
     this.acels.set('Move', 'Move South(Leap)', 'CmdOrCtrl+ArrowDown', () => { this.cursor.move(0, -this.grid.h) })
@@ -145,7 +147,6 @@ function Client () {
     this.toggleGuide()
 
     this.map.start()
-    this.map.fetchMap('./maps/dum.txt')
   }
 
   this.reset = () => {
@@ -405,6 +406,7 @@ function Client () {
     this.el.height = h
     this.el.style.width = `${Math.ceil(this.tile.w * this.orca.w)}px`
     this.el.style.height = `${Math.ceil((this.tile.h + (this.tile.h / 5)) * this.orca.h)}px`
+    this.sketch.resize(this.el.width, this.el.height, this.el.style.height);
 
     this.context.textBaseline = 'bottom'
     this.context.textAlign = 'center'
