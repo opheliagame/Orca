@@ -4,13 +4,14 @@ function GameMap(client) {
   const fs = require('fs')
 
   this.fullmap = null
+  this.mapString = null
   this.x = 0
   this.y = 0
   this.width = null
   this.height = null
-  this.buildMode = true
+  this.buildMode = false
   if (this.buildMode) this.url = null
-  else this.url = './maps/map2.txt'
+  else this.url = './maps/sample1.txt'
 
   this.start = () => {
     document.addEventListener('mousedown', this.onMouseDown)
@@ -20,11 +21,10 @@ function GameMap(client) {
   }
 
   this.drawMap = () => {
-    this.fullmap.split('\n').forEach((line, y) => {
+    this.mapString.split('\n').forEach((line, y) => {
       line.split('').forEach((pos, x) => {
-        console.log(pos, x, y)
-        if(pos == 'a') {
-          this.makeColorBlock(x, y)
+        if(pos == 'x') {
+          this.makeColorBlock(x, y, 'white')
         }
       })
     })
@@ -34,20 +34,25 @@ function GameMap(client) {
     fetch(this.url)
       .then(response => response.text())
       .then(map => {
-        this.fullmap = map
-        let mapArr = this.fullmap.split('\n')
+        this.mapString = map
+        let mapArr = this.mapString.split('\n')
         this.x = Math.floor(mapArr[0].length / 2)
         this.y = Math.floor(mapArr.length / 2)
         this.width = mapArr[0].length
         this.height = mapArr.length
         console.log(`Gamemap -> width:${this.width} height:${this.height}`)
+
+        // constructing map 2d array
+        this.fullmap = mapArr
+        this.fullmap.forEach((line, index) => this.fullmap[index] = line.split(''))
+
         this.drawMap()
       })
     
   }
 
   this.getMapSection = (x1, x2, y1, y2) => {
-    let mapArr = this.fullmap.split('\n')
+    let mapArr = this.mapString.split('\n')
     return mapArr.slice(y1, y2)
           .map(line => line.substring(x1, x2))
           .join('\n')
@@ -61,15 +66,46 @@ function GameMap(client) {
     // client.cursor.scaleTo(data.split(/\r?\n/)[0].length - 1, data.split(/\r?\n/).length - 1)
   }
 
-  this.makeColorBlock = (x, y) => {
+  this.makeColorBlock = (x, y, color) => {
     const w = client.tile.ws
     const h = client.tile.hs
-    client.sketch.context.fillStyle = 'white'
+    client.sketch.context.fillStyle = color
     client.sketch.context.fillRect(x * w, y * h, w, h)
   }
 
   this.draw = () => {
-    this.makeColorBlock(client.cursor.minX, client.cursor.minY)
+    this.makeColorBlock(client.cursor.x, client.cursor.y, 'red')
+  }
+
+  this.movePlayer = (key) => {
+    // player navigation of map 
+    let nextPos = {x: client.cursor.x, y: client.cursor.y}
+    switch(key) {
+      case 'ArrowUp':
+        nextPos.moveX = nextPos.x
+        nextPos.moveY = nextPos.y + 1
+        break
+      case 'ArrowDown':
+        nextPos.moveX = nextPos.x
+        nextPos.moveY = nextPos.y - 1
+        break
+      case 'ArrowLeft':
+        nextPos.moveX = nextPos.x + 1
+        nextPos.moveY = nextPos.y
+        break
+      case 'ArrowRight':
+        nextPos.moveX = nextPos.x - 1
+        nextPos.moveY = nextPos.y
+        break
+      default:
+        return
+    }
+
+    let isWall = this.fullmap[nextPos.y][nextPos.x] == 'x'
+    if(isWall) {
+      // console.log(nextPos.moveX, nextPos.moveY)
+      client.cursor.moveTo(nextPos.moveX, nextPos.moveY)
+    }
   }
 
   this.onKeyDown = (e) => {
@@ -92,8 +128,13 @@ function GameMap(client) {
         return
     }
 
-    this.draw()
-    if (this.buildMode) this.buildMap()
+    if (this.buildMode) {
+      this.draw()
+      this.buildMap()
+    } else {
+      this.movePlayer(e.key)
+      this.draw()
+    }
     
     // if(this.x < 0 || this.x > this.width-1 || this.y < 0 || this.y > this.height-1) return
     // let y1 = this.y-1, y2 = this.y+2, x1 = this.x-1, x2 = this.x+2
@@ -117,7 +158,10 @@ function GameMap(client) {
   this.onMouseDown = (e) => {
     // const data = this.getMapSection(this.x-1, this.x+2, this.y-1, this.y+2)
     // this.revealMapSection(data, -1, -1) 
-    this.draw()
+    if (this.buildMode) {
+      this.draw()
+      this.buildMap()
+    } 
     e.preventDefault()
     document.removeEventListener('mousedown', this.onMouseDown)
   }
@@ -134,7 +178,7 @@ function GameMap(client) {
         temp = temp + line.join('') + '\n'
       })
       // const temp = this.fullmap.join('\n')
-      fs.writeFileSync('test.txt', temp, 'utf8')
+      fs.writeFileSync('./sources/maps/test.txt', temp, 'utf8')
     } catch (e) {
       console.log(e)
     }
